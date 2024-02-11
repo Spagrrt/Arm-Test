@@ -24,7 +24,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private PID rotatePID, extendPID, anklePID;
 
-    private double desiredExtensionRotations;
+    private double desiredExtensionRotations, desiredArmRotations;
 
     public ElevatorSubsystem() {
         ShuffleboardTab tab = Shuffleboard.getTab("ARM");
@@ -41,8 +41,8 @@ public class ElevatorSubsystem extends SubsystemBase {
         extendMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
         ankleMotor.setIdleMode(CANSparkBase.IdleMode.kBrake);
 
-        rotateMotor1.setInverted(false);
-        rotateMotor2.setInverted(false);
+        rotateMotor1.setInverted(true);
+        rotateMotor2.setInverted(true);
         extendMotor.setInverted(true);
         ankleMotor.setInverted(false);
 
@@ -50,10 +50,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         extendEncoder = new DutyCycleEncoder(extendEncoderID);
         ankleEncoder = new DutyCycleEncoder(ankleEncoderID);
 
-        rotatePID = new PID(cRotateP, cRotateI, cRotateD, cRotateMax, cRotateMin, cRotateDeadband, this::getRotationAbsolute);
+        rotatePID = new PID(cRotateP, cRotateI, cRotateD, cRotateMax, cRotateMin, cRotateDeadband, this::getRotation);
         extendPID = new PID(cExtendP, cExtendI, cExtendD, cExtendMax, cExtendMin, cExtendDeadband, this::getExtension);
 
-        desiredExtensionRotations = 0.546;
+        setExtensionHome();
+        setArmHome();
 
         tab.add("Rotation Encoder", rotateEncoder);
         tab.add("Extension Encoder", extendEncoder);
@@ -71,19 +72,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         super.periodic();
+        rotatePID.setGoal(desiredArmRotations);
         extendPID.setGoal(desiredExtensionRotations);
 
-        System.out.println("Desired Extension: " + desiredExtensionRotations);
-        System.out.println("Current Extension: " + getExtension());
+        double rotatePIDOut = rotatePID.calculate();
+        double rotateSpeed = Mth.clamp(rotatePIDOut, -0.8, 0.8);
 
-        double extendCalculated = extendPID.calculate();
-        double extendClamped = Mth.clamp(extendCalculated, -0.8, 0.1);
+        System.out.println("Current Rotations: " + getRotation());
+        System.out.println("Desired Rotations: " + desiredArmRotations);
+        System.out.println("Rotate PID: " + rotatePIDOut);
+        System.out.println("Rotate PID Clamped: " + rotateSpeed);
 
-        System.out.println("Current PID: " + extendCalculated);
-        System.out.println("Current Clamped: " + extendClamped);
-
-        //TODO pick up here (pid tuning)
-        setExtendSpeed(extendClamped);
+        setRotateSpeed(rotateSpeed);
+        setExtendSpeed(Mth.clamp(extendPID.calculate(), -0.8, 0.1));
     }
 
     public void setDesiredPosition(Translation2d target){
@@ -101,6 +102,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void setExtensionHome(){
         desiredExtensionRotations = 0.546;
+    }
+
+    public void setDesiredArmAngle(double armAngleRAD){
+        desiredArmRotations = (0.1502 * armAngleRAD) + 0.6114;
+    }
+
+    public void setArmHome(){
+        desiredArmRotations = 0.61;
     }
 
     public void setRotateSpeed(double speed){
