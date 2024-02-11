@@ -13,6 +13,8 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
+import java.util.Optional;
+
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -34,6 +36,9 @@ public class RobotContainer
     ExtendToLengthCommand extendTo25 = new ExtendToLengthCommand(elevatorSubsystem, 0.55);
     RotateToAngleCommand rotateToAngleCommand = new RotateToAngleCommand(Math.toRadians(90), elevatorSubsystem);
     RotateAnkleCommand rotateAnkleCommand = new RotateAnkleCommand(Math.toRadians(80), elevatorSubsystem);
+
+    ThreeAngleCommand pickupCommand = new ThreeAngleCommand(elevatorSubsystem, Optional.of(Math.toRadians(10)), Optional.of(0.185), Optional.of(Math.toRadians(-75)));
+    ThreeAngleCommand speakerShootCommand = new ThreeAngleCommand(elevatorSubsystem, Optional.of(Math.toRadians(0)), Optional.of(0.0), Optional.of(Math.toRadians(50)));
 
     ShooterCommand powerCommand = new ShooterCommand(shooterSubsystem, ShooterCommand.ShooterType.POWER);
     ShooterCommand controlCommand = new ShooterCommand(shooterSubsystem, ShooterCommand.ShooterType.CONTROL);
@@ -63,10 +68,10 @@ public class RobotContainer
     private void configureBindings()
     {
         //Constants.button5.whileTrue(ankleCommand);
-        //Constants.button3.whileTrue(rotateCommand);
-        //Constants.button4.whileTrue(extendCommand);
+        Constants.button3.whileTrue(pickupCommand);
+        Constants.button4.whileTrue(speakerShootCommand);
         Constants.button6.whileTrue(controlCommand);
-        Constants.button7.whileTrue(rotateAnkleCommand);
+        //Constants.button7.whileTrue(rotateAnkleCommand);
         Constants.trigger.whileTrue(powerCommand);
     }
     

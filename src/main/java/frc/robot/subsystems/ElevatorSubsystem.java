@@ -69,6 +69,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         tab.addNumber("Absolute Rotation", this::getRotationAbsolute);
         tab.addNumber("Absolute Extension", this::getExtensionAbsolute);
         tab.addNumber("Ankle Absolute", this::getAnkleAbsolute);
+
+        tab.addNumber("Arm Desired Rotation", () -> desiredArmRotations);
+        tab.addNumber("Arm Desired Extension", () -> desiredExtensionRotations);
+        tab.addNumber("Ankle Desired Rotation", () -> desiredAnkleRotations);
     }
 
     @Override
@@ -78,17 +82,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         extendPID.setGoal(desiredExtensionRotations);
         anklePID.setGoal(desiredAnkleRotations);
 
-        double anklePIDOut = anklePID.calculate();
-        double anklePIDClamped = Mth.clamp(anklePIDOut, -0.8, 0.8);
-
-        System.out.println("Ankle PID: " + anklePIDOut);
-        System.out.println("Ankle Clamped: " + anklePIDClamped);
-        System.out.println("Desired Ankle: " + desiredAnkleRotations);
-        System.out.println("Current Ankle: " + this.getAnkle());
-
         setRotateSpeed(Mth.clamp(rotatePID.calculate(), -0.8, 0.8));
         setExtendSpeed(Mth.clamp(extendPID.calculate(), -0.8, 0.1));
-        setAnkleSpeed(anklePIDClamped);
+        setAnkleSpeed(Mth.clamp(anklePID.calculate(), -0.8, 0.8));
     }
 
     public void setDesiredPosition(Translation2d target){
