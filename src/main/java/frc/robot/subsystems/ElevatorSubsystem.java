@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.math.ElevatorMath;
+import frc.robot.math.Mth;
 import frc.robot.math.PID;
 
 import static frc.robot.Constants.*;
@@ -50,9 +51,9 @@ public class ElevatorSubsystem extends SubsystemBase {
         ankleEncoder = new DutyCycleEncoder(ankleEncoderID);
 
         rotatePID = new PID(cRotateP, cRotateI, cRotateD, cRotateMax, cRotateMin, cRotateDeadband, this::getRotationAbsolute);
-        rotatePID = new PID(cExtendP, cExtendI, cExtendD, cExtendMax, cExtendMin, cExtendDeadband, this::getExtension);
+        extendPID = new PID(cExtendP, cExtendI, cExtendD, cExtendMax, cExtendMin, cExtendDeadband, this::getExtension);
 
-        desiredExtensionRotations = 0.454;
+        desiredExtensionRotations = 0.546;
 
         tab.add("Rotation Encoder", rotateEncoder);
         tab.add("Extension Encoder", extendEncoder);
@@ -72,8 +73,17 @@ public class ElevatorSubsystem extends SubsystemBase {
         super.periodic();
         extendPID.setGoal(desiredExtensionRotations);
 
+        System.out.println("Desired Extension: " + desiredExtensionRotations);
+        System.out.println("Current Extension: " + getExtension());
+
+        double extendCalculated = extendPID.calculate();
+        double extendClamped = Mth.clamp(extendCalculated, -0.8, 0.1);
+
+        System.out.println("Current PID: " + extendCalculated);
+        System.out.println("Current Clamped: " + extendClamped);
+
         //TODO pick up here (pid tuning)
-        setExtendSpeed(extendPID.calculate());
+        setExtendSpeed(extendClamped);
     }
 
     public void setDesiredPosition(Translation2d target){
@@ -85,8 +95,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         //23.25cm = 0.454 to -1.73 (-2.184)
         //31.5cm = 0.454 to -2.16 (-2.614)
 
-        desiredExtensionRotations = (-8.5035 * desiredExtensionMeters) + 0.3925;
+        desiredExtensionRotations = (-9.2686 * desiredExtensionMeters) + 0.3799;
 
+    }
+
+    public void setExtensionHome(){
+        desiredExtensionRotations = 0.546;
     }
 
     public void setRotateSpeed(double speed){

@@ -1,6 +1,8 @@
 package frc.robot.math;
 
 
+import com.pathplanner.lib.util.PIDConstants;
+
 import java.util.function.DoubleSupplier;
 
 public class PID {
@@ -26,6 +28,16 @@ public class PID {
         this.actualSupplier = actualSupplier;
     }
 
+    public PID(PIDConstants pid, double max, double min, double deadband, DoubleSupplier actualSupplier){
+        this.P = pid.kP;
+        this.I = pid.kI;
+        this.D = pid.kD;
+        this.max_output = max;
+        this.min_output = min;
+        this.deadband = deadband;
+        this.actualSupplier = actualSupplier;
+    }
+
     public double calculate() {
         error = setpoint - actualSupplier.getAsDouble(); // Error = Target - Actual
         this.integral += (error * .02); // Integral is increased by the error*time (which is .02 seconds using normal
@@ -37,6 +49,7 @@ public class PID {
     }
 
     public void setGoal(double setpoint){
+        this.integral = 0;
         this.setpoint = setpoint;
     }
 
