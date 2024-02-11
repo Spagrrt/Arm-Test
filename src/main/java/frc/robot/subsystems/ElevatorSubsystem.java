@@ -24,7 +24,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private PID rotatePID, extendPID, anklePID;
 
-    private double desiredExtensionRotations, desiredArmRotations;
+    private double desiredExtensionRotations, desiredArmRotations, desiredAnkleRotations;
 
     public ElevatorSubsystem() {
         ShuffleboardTab tab = Shuffleboard.getTab("ARM");
@@ -44,7 +44,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         rotateMotor1.setInverted(true);
         rotateMotor2.setInverted(true);
         extendMotor.setInverted(true);
-        ankleMotor.setInverted(false);
+        ankleMotor.setInverted(true);
 
         rotateEncoder = new DutyCycleEncoder(rotateEncoderID);
         extendEncoder = new DutyCycleEncoder(extendEncoderID);
@@ -52,9 +52,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
         rotatePID = new PID(cRotateP, cRotateI, cRotateD, cRotateMax, cRotateMin, cRotateDeadband, this::getRotation);
         extendPID = new PID(cExtendP, cExtendI, cExtendD, cExtendMax, cExtendMin, cExtendDeadband, this::getExtension);
+        anklePID = new PID(cAnkleP, cAnkleI, cAnkleD, cAnkleMax, cAnkleMin, cAnkleDeadband, this::getAnkle);
 
         setExtensionHome();
         setArmHome();
+        setAnkleHome();
 
         tab.add("Rotation Encoder", rotateEncoder);
         tab.add("Extension Encoder", extendEncoder);
@@ -74,17 +76,19 @@ public class ElevatorSubsystem extends SubsystemBase {
         super.periodic();
         rotatePID.setGoal(desiredArmRotations);
         extendPID.setGoal(desiredExtensionRotations);
+        anklePID.setGoal(desiredAnkleRotations);
 
-        double rotatePIDOut = rotatePID.calculate();
-        double rotateSpeed = Mth.clamp(rotatePIDOut, -0.8, 0.8);
+        double anklePIDOut = anklePID.calculate();
+        double anklePIDClamped = Mth.clamp(anklePIDOut, -0.8, 0.8);
 
-        System.out.println("Current Rotations: " + getRotation());
-        System.out.println("Desired Rotations: " + desiredArmRotations);
-        System.out.println("Rotate PID: " + rotatePIDOut);
-        System.out.println("Rotate PID Clamped: " + rotateSpeed);
+        System.out.println("Ankle PID: " + anklePIDOut);
+        System.out.println("Ankle Clamped: " + anklePIDClamped);
+        System.out.println("Desired Ankle: " + desiredAnkleRotations);
+        System.out.println("Current Ankle: " + this.getAnkle());
 
-        setRotateSpeed(rotateSpeed);
+        setRotateSpeed(Mth.clamp(rotatePID.calculate(), -0.8, 0.8));
         setExtendSpeed(Mth.clamp(extendPID.calculate(), -0.8, 0.1));
+        setAnkleSpeed(anklePIDClamped);
     }
 
     public void setDesiredPosition(Translation2d target){
@@ -110,6 +114,14 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public void setArmHome(){
         desiredArmRotations = 0.61;
+    }
+
+    public void setDesiredAnkleAngle(double ankleAngleRAD){
+        desiredAnkleRotations = (0.1562 * ankleAngleRAD) + 0.5773;
+    }
+
+    public void setAnkleHome(){
+        desiredAnkleRotations = 0.5773;
     }
 
     public void setRotateSpeed(double speed){

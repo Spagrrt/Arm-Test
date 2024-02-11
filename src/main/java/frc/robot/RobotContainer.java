@@ -9,10 +9,7 @@ import frc.robot.Constants.OperatorConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.ElevatorManualCommand;
-import frc.robot.commands.ExtendToLengthCommand;
-import frc.robot.commands.RotateToAngleCommand;
-import frc.robot.commands.ShooterCommand;
+import frc.robot.commands.*;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
@@ -36,6 +33,7 @@ public class RobotContainer
 
     ExtendToLengthCommand extendTo25 = new ExtendToLengthCommand(elevatorSubsystem, 0.55);
     RotateToAngleCommand rotateToAngleCommand = new RotateToAngleCommand(Math.toRadians(90), elevatorSubsystem);
+    RotateAnkleCommand rotateAnkleCommand = new RotateAnkleCommand(Math.toRadians(80), elevatorSubsystem);
 
     ShooterCommand powerCommand = new ShooterCommand(shooterSubsystem, ShooterCommand.ShooterType.POWER);
     ShooterCommand controlCommand = new ShooterCommand(shooterSubsystem, ShooterCommand.ShooterType.CONTROL);
@@ -64,11 +62,11 @@ public class RobotContainer
      */
     private void configureBindings()
     {
-        Constants.button5.whileTrue(ankleCommand);
-        Constants.button3.whileTrue(rotateCommand);
+        //Constants.button5.whileTrue(ankleCommand);
+        //Constants.button3.whileTrue(rotateCommand);
         //Constants.button4.whileTrue(extendCommand);
         Constants.button6.whileTrue(controlCommand);
-        Constants.button7.whileTrue(rotateToAngleCommand);
+        Constants.button7.whileTrue(rotateAnkleCommand);
         Constants.trigger.whileTrue(powerCommand);
     }
     

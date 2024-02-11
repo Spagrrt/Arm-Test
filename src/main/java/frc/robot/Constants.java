@@ -66,10 +66,17 @@ public final class Constants
     public static final double cExtendMin = -1;
     public static final double cExtendDeadband = 0;
 
-    public static final double cArmMin = 0.597; //1 degree
-    public static final double cArmMax = 0.89; //105 degrees
-    public static final double cAnkleMin = 0.325; // -90 degrees
-    public static final double cAnkleMax = 0.825; // 90 degrees
+    public static final double cAnkleP = 6;
+    public static final double cAnkleI = 0;
+    public static final double cAnkleD = 0;
+    public static final double cAnkleMax = 1;
+    public static final double cAnkleMin = -1;
+    public static final double cAnkleDeadband = 0;
+
+//    public static final double cArmMin = 0.597; //1 degree
+//    public static final double cArmMax = 0.89; //105 degrees
+//    public static final double cAnkleMin = 0.325; // -90 degrees
+//    public static final double cAnkleMax = 0.825; // 90 degrees
 
     //NEGATIVE EXTENSION
 
